@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ôn Tập Kiểm Soát Thủ Tục Hành Chính</title>
+<style>
+  :root {
+    --primary: #1a56a4;
+    --primary-dark: #0e3d7a;
+    --accent: #e8a020;
+    --success: #1e8f4e;
+    --danger: #c0392b;
+    --bg: #f0f4f9;
+    --card: #ffffff;
+    --text: #1a2333;
+    --muted: #6b7a90;
+    --border: #d1dae6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+  header .logo { font-size: 28px; }
+  header h1 { font-size: 18px; font-weight: 700; line-height: 1.3; }
+  header h1 span { display: block; font-size: 13px; font-weight: 400; opacity: 0.82; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* START SCREEN */
+  #start-screen { max-width: 560px; margin: 40px auto; padding: 0 16px; }
+  .start-card { background: var(--card); border-radius: 16px; padding: 36px 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .start-card h2 { font-size: 22px; color: var(--primary); margin-bottom: 8px; }
+  .start-card p { color: var(--muted); margin-bottom: 24px; font-size: 15px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  .info-box { background: var(--bg); border-radius: 10px; padding: 14px; text-align: center; }
+  .info-box .val { font-size: 26px; font-weight: 700; color: var(--primary); }
+  .info-box .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  label.field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  input[type=text] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 16px; transition: border-color .2s; outline: none; }
+  input[type=text]:focus { border-color: var(--primary); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 28px; border-radius: 9px; border: none; cursor: pointer; font-size: 16px; font-weight: 600; transition: all .18s; }
+  .btn-primary { background: var(--primary); color: #fff; width: 100%; margin-top: 18px; }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+  .btn-outline:hover { background: var(--primary); color: #fff; }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { background: #c98010; }
+  .tab-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab-btn { flex: 1; padding: 9px; border: 2px solid var(--border); border-radius: 8px; background: transparent; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); transition: all .18s; }
+  .tab-btn.active { border-color: var(--primary); color: var(--primary); background: #e8f0fc; }
+
+  /* QUIZ SCREEN */
+  #quiz-screen { max-width: 780px; margin: 0 auto; padding: 20px 16px 40px; }
+  .quiz-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .progress-info { display: flex; align-items: center; gap: 10px; }
+  .q-counter { font-weight: 700; color: var(--primary); font-size: 15px; }
+  .timer-box { display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .timer-box.warn { color: var(--danger); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.6} }
+  .progress-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 20px; }
+  .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width .4s; }
+  .question-card { background: var(--card); border-radius: 14px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 16px; }
+  .question-num { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .question-text { font-size: 16px; line-height: 1.6; font-weight: 500; margin-bottom: 22px; }
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: #fff; cursor: pointer; text-align: left; font-size: 15px; line-height: 1.5; transition: all .15s; }
+  .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #eef3fc; }
+  .option-btn .opt-label { font-weight: 700; color: var(--primary); min-width: 22px; }
+  .option-btn.selected { border-color: var(--primary); background: #dce9fb; }
+  .option-btn.correct { border-color: var(--success); background: #e4f5ec; }
+  .option-btn.wrong { border-color: var(--danger); background: #fde8e8; }
+  .option-btn.correct .opt-label { color: var(--success); }
+  .option-btn.wrong .opt-label { color: var(--danger); }
+  .option-btn:disabled { cursor: default; }
+  .answer-reveal { background: #fffbe6; border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 16px; margin-top: 16px; font-size: 14px; line-height: 1.6; }
+  .answer-reveal strong { color: var(--accent); }
+  .quiz-footer { display: flex; justify-content: space-between; align-items: center; }
+  .skip-btn { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; text-decoration: underline; }
+  .submit-quiz-btn { background: var(--danger); color: #fff; padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .submit-quiz-btn:hover { background: #a93226; }
+
+  /* RESULT SCREEN */
+  #result-screen { max-width: 600px; margin: 36px auto; padding: 0 16px 60px; }
+  .result-card { background: var(--card); border-radius: 16px; padding: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+  .score-circle { width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; border: 6px solid; }
+  .score-circle.pass { border-color: var(--success); color: var(--success); background: #eaf7f0; }
+  .score-circle.fail { border-color: var(--danger); color: var(--danger); background: #fde8e8; }
+  .score-circle .big { font-size: 36px; line-height: 1; }
+  .score-circle .small { font-size: 13px; }
+  .result-card h2 { font-size: 22px; margin-bottom: 6px; }
+  .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0; }
+  .stat-box { background: var(--bg); border-radius: 10px; padding: 12px; }
+  .stat-box .sv { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-box .sl { font-size: 12px; color: var(--muted); }
+  .review-section { margin-top: 24px; text-align: left; }
+  .review-item { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .review-item-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--bg); cursor: pointer; font-size: 14px; }
+  .review-item-header .ri-status { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .ri-status.ok { background: var(--success); color: #fff; }
+  .ri-status.bad { background: var(--danger); color: #fff; }
+  .review-item-body { padding: 14px 16px; font-size: 14px; display: none; }
+  .review-item-body.open { display: block; }
+  .review-item-body .correct-ans { color: var(--success); font-weight: 600; margin-top: 6px; }
+  .review-item-body .user-ans { color: var(--danger); font-weight: 600; margin-top: 6px; }
+  .result-actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+
+  /* LEADERBOARD */
+  #leaderboard-screen { max-width: 600px; margin: 36px auto; padding: 0 16px 60px; }
+  .lb-card { background: var(--card); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .lb-card h2 { font-size: 20px; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .lb-table { width: 100%; border-collapse: collapse; }
+  .lb-table th { text-align: left; padding: 10px 12px; font-size: 12px; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--border); }
+  .lb-table td { padding: 12px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .lb-table tr:last-child td { border-bottom: none; }
+  .lb-table tr.highlight td { background: #fffbe6; font-weight: 700; }
+  .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: 13px; }
+  .rank-1 { background: #ffd700; color: #5a3e00; }
+  .rank-2 { background: #c0c0c0; color: #3a3a3a; }
+  .rank-3 { background: #cd7f32; color: #fff; }
+  .rank-n { background: var(--border); color: var(--muted); }
+  .score-bar { background: var(--border); height: 6px; border-radius: 3px; margin-top: 4px; }
+  .score-bar-fill { background: var(--primary); height: 100%; border-radius: 3px; }
+  .empty-lb { text-align: center; color: var(--muted); padding: 40px 0; font-size: 15px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); text-decoration: none; font-size: 15px; font-weight: 600; margin-bottom: 16px; cursor: pointer; border: none; background: none; }
+  .back-link:hover { text-decoration: underline; }
+  .name-display { background: var(--bg); border-radius: 8px; padding: 8px 14px; font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+
+  @media(max-width:480px) {
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    .result-stats { grid-template-columns: repeat(3, 1fr); }
+    .start-card { padding: 24px 18px; }
+    .question-card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📋</div>
+  <h1>Ôn Tập Kiểm Soát Thủ Tục Hành Chính
+    <span>Tỉnh Nghệ An — Hệ thống thi trắc nghiệm</span>
+  </h1>
+</header>
+
+<!-- START SCREEN -->
+<div id="start-screen" class="screen active">
+  <div class="start-card">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="showTab('start-tab')">🎯 Thi</button>
+      <button class="tab-btn" onclick="showTab('lb-tab')">🏆 Bảng xếp hạng</button>
+    </div>
+
+    <div id="start-tab">
+      <h2>Bài thi trắc nghiệm</h2>
+      <p>40 câu hỏi được chọn ngẫu nhiên từ ngân hàng đề. Hãy nhập tên trước khi bắt đầu!</p>
+      <div class="info-grid">
+        <div class="info-box"><div class="val">40</div><div class="lbl">Số câu hỏi</div></div>
+        <div class="info-box"><div class="val" id="total-q-display">—</div><div class="lbl">Ngân hàng đề</div></div>
+        <div class="info-box"><div class="val">45'</div><div class="lbl">Thời gian làm bài</div></div>
+        <div class="info-box"><div class="val">50%</div><div class="lbl">Điểm đạt yêu cầu</div></div>
+      </div>
+      <label class="field-label" for="player-name">Họ và tên của bạn</label>
+      <input type="text" id="player-name" placeholder="Ví dụ: Nguyễn Văn A" maxlength="60" />
+      <button class="btn btn-primary" onclick="startQuiz()">▶ Bắt đầu làm bài</button>
+    </div>
+
+    <div id="lb-tab" style="display:none">
+      <h2>🏆 Bảng xếp hạng</h2>
+      <p style="margin-bottom:18px;color:var(--muted);font-size:14px;">Top 20 kết quả cao nhất</p>
+      <div id="inline-lb"></div>
+      <button class="btn btn-outline" style="margin-top:16px;width:100%" onclick="clearLeaderboard()">🗑 Xóa bảng xếp hạng</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen" class="screen">
+  <div class="quiz-topbar">
+    <div class="progress-info">
+      <span class="q-counter" id="q-counter">Câu 1 / 40</span>
+      <div id="player-tag" class="name-display" style="margin:0;padding:6px 10px;font-size:13px"></div>
+    </div>
+    <div class="timer-box" id="timer-box">⏱ <span id="timer-display">45:00</span></div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+
+  <div class="question-card">
+    <div class="question-num" id="question-num">Câu 1</div>
+    <div class="question-text" id="question-text"></div>
+    <div class="options-list" id="options-list"></div>
+    <div id="answer-reveal" style="display:none" class="answer-reveal"></div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="skip-btn" id="skip-btn" onclick="nextQuestion()">Bỏ qua →</button>
+    <button class="submit-quiz-btn" onclick="confirmSubmit()">📤 Nộp bài</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result-screen" class="screen">
+  <button class="back-link" onclick="goHome()">← Về trang chủ</button>
+  <div class="result-card">
+    <div class="score-circle" id="score-circle">
+      <div class="big" id="score-pct">0%</div>
+      <div class="small" id="score-fraction">0/40</div>
+    </div>
+    <h2 id="result-title">Kết quả bài thi</h2>
+    <p id="result-subtitle" style="color:var(--muted);margin-bottom:4px;font-size:15px"></p>
+    <div class="result-stats">
+      <div class="stat-box"><div class="sv" id="stat-correct" style="color:var(--success)">0</div><div class="sl">Đúng ✓</div></div>
+      <div class="stat-box"><div class="sv" id="stat-wrong" style="color:var(--danger)">0</div><div class="sl">Sai ✗</div></div>
+      <div class="stat-box"><div class="sv" id="stat-time">0:00</div><div class="sl">Thời gian</div></div>
+    </div>
+    <div class="review-section">
+      <h3 style="font-size:16px;margin-bottom:12px">📝 Xem lại đáp án</h3>
+      <div id="review-list"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="startQuiz()">🔄 Thi lại</button>
+      <button class="btn btn-outline" onclick="showTab('lb-tab');goHome()">🏆 Bảng xếp hạng</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD SCREEN (standalone) -->
+<div id="leaderboard-screen" class="screen">
+  <div style="max-width:600px;margin:0 auto;padding:0 16px">
+    <button class="back-link" onclick="goHome()">← Về trang chủ</button>
+    <div class="lb-card">
+      <h2>🏆 Bảng xếp hạng</h2>
+      <div id="lb-main"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// QUESTION BANK
+// ============================================================
+const ALL_QUESTIONS = [
+  {
+    q: "Cơ sở pháp lý chủ yếu để cá nhân, tổ chức trên địa bàn tỉnh Nghệ An thực hiện quyền phản ánh, kiến nghị đối với các quy định hành chính tới các cơ quan nhà nước?",
+    opts: ["Nghị định số 20/2008/NĐ-CP ngày 14/02/2008 của Chính phủ", "Quyết định số 28/2018/QĐ-UBND ngày 22/6/2018 của UBND tỉnh", "Cả 2 phương án trên"],
+    ans: 2, explain: "Cả Nghị định 20/2008/NĐ-CP và Quyết định 28/2018/QĐ-UBND đều là cơ sở pháp lý."
+  },
+  {
+    q: "Thủ tướng Chính phủ chỉ đạo các bộ, ngành, địa phương nâng cao chất lượng giải quyết thủ tục hành chính thông qua Chỉ thị nào?",
+    opts: ["Chỉ thị 30/CT-TTg ngày 30/10/2018 của Thủ tướng Chính phủ", "Chỉ thị số 26/CT-TTg ngày 05/9/2016 của Thủ tướng Chính phủ", "Cả 2 phương án trên"],
+    ans: 0, explain: "Chỉ thị 30/CT-TTg ngày 30/10/2018 về nâng cao chất lượng giải quyết thủ tục hành chính của các bộ, ngành, địa phương."
+  },
+  {
+    q: "Để đơn giản hóa thủ tục hành chính, giấy tờ công dân và các cơ sở dữ liệu liên quan đến quản lý dân cư, Thủ tướng Chính phủ đã phê duyệt Đề án nào?",
+    opts: ["Đề án \"Xác định Chỉ số cải cách hành chính của các bộ, cơ quan ngang bộ, UBND tỉnh, thành phố\"", "Đề án tổng thể đơn giản hóa TTHC, giấy tờ công dân và cơ sở dữ liệu liên quan đến quản lý dân cư giai đoạn 2013-2020", "Đề án \"Đo lường sự hài lòng của người dân, tổ chức đối với cơ quan HCNN giai đoạn 2017-2020\""],
+    ans: 1, explain: "Quyết định số 896/QĐ-TTg ngày 08/6/2013 của Thủ tướng Chính phủ phê duyệt Đề án tổng thể."
+  },
+  {
+    q: "Phạm vi đơn giản hóa TTHC, giấy tờ công dân và cơ sở dữ liệu liên quan đến quản lý dân cư theo Quyết định số 896/QĐ-TTg được xác định như thế nào?",
+    opts: ["Thực hiện trên tất cả các lĩnh vực quản lý nhà nước", "Thực hiện ở lĩnh vực tư pháp - hộ tịch và cư trú", "Thực hiện ở lĩnh vực quản lý nhà nước liên quan đến quyền con người theo Hiến pháp 2013"],
+    ans: 0, explain: "Theo khoản 3 mục I Điều 1 Quyết định số 896/QĐ-TTg ngày 08/6/2013."
+  },
+  {
+    q: "Nghị định số 20/2008/NĐ-CP ngày 14/02/2008 của Chính phủ quy định nội dung gì?",
+    opts: ["Về xử lý vi phạm hành chính trong việc thực hiện quy định hành chính", "Về tiếp nhận, xử lý phản ánh, kiến nghị của cá nhân, tổ chức về quy định hành chính liên quan đến hoạt động kinh doanh, đời sống nhân dân", "Về khiếu nại, tố cáo và giải quyết khiếu nại, tố cáo"],
+    ans: 1, explain: "Theo Điều 1 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Nghị định số 20/2008/NĐ-CP ngày 14/02/2008 của Chính phủ không điều chỉnh đối với nội dung nào?",
+    opts: ["Việc tiếp nhận, xử lý phản ánh, kiến nghị của cá nhân về các quy định hành chính liên quan đến hoạt động kinh doanh", "Về khiếu nại, tố cáo và giải quyết khiếu nại, tố cáo", "Việc tiếp nhận, xử lý phản ánh, kiến nghị của tổ chức về quy định hành chính liên quan đến đời sống nhân dân"],
+    ans: 1, explain: "Theo Điều 1 Nghị định số 20/2008/NĐ-CP: khiếu nại, tố cáo không thuộc phạm vi điều chỉnh."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, phản ánh, kiến nghị của cá nhân, tổ chức về quy định hành chính được thực hiện thông qua hình thức nào?",
+    opts: ["Văn bản; điện thoại", "Phiếu lấy ý kiến", "Cả 2 hình thức trên"],
+    ans: 2, explain: "Theo Điều 6 Nghị định số 20/2008/NĐ-CP: cả văn bản, điện thoại và Phiếu lấy ý kiến."
+  },
+  {
+    q: "Quy định hành chính theo Nghị định số 20/2008/NĐ-CP được quy định như thế nào?",
+    opts: ["Là hành vi có lỗi do cá nhân, tổ chức thực hiện, vi phạm quy định pháp luật về quản lý nhà nước", "Là những quy định về cơ chế, chính sách, TTHC liên quan đến hoạt động kinh doanh và đời sống nhân dân, do cơ quan, người có thẩm quyền ban hành", "Là biện pháp xử lý hành chính"],
+    ans: 1, explain: "Theo khoản 1 Điều 3 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, việc tiếp nhận, xử lý phản ánh, kiến nghị phải tuân theo bao nhiêu nguyên tắc?",
+    opts: ["4 nguyên tắc", "5 nguyên tắc", "6 nguyên tắc"],
+    ans: 2, explain: "Theo Điều 4 Nghị định số 20/2008/NĐ-CP: 6 nguyên tắc."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, nội dung nào quy định về đối tượng áp dụng phản ánh, kiến nghị?",
+    opts: ["Cơ quan HCNN, người có thẩm quyền tiếp nhận, xử lý các phản ánh, kiến nghị", "Cá nhân, tổ chức có phản ánh, kiến nghị về quy định hành chính", "Cá nhân, tổ chức vi phạm pháp luật về hành chính"],
+    ans: 2, explain: "Theo Điều 2 Nghị định số 20/2008/NĐ-CP: Đối tượng là cá nhân, tổ chức vi phạm pháp luật về hành chính."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, nội dung nào không thuộc phạm vi được phản ánh, kiến nghị?",
+    opts: ["Sáng kiến ban hành mới quy định hành chính liên quan đến hoạt động kinh doanh, đời sống nhân dân", "Khiếu nại, tố cáo quyết định hành chính, hành vi hành chính của cơ quan, người có thẩm quyền", "Quy định hành chính không hợp pháp"],
+    ans: 1, explain: "Theo Điều 5 Nghị định số 20/2008/NĐ-CP: khiếu nại, tố cáo không thuộc phạm vi."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, phản ánh, kiến nghị bằng văn bản có yêu cầu gì?",
+    opts: ["Sử dụng ngôn ngữ Tiếng Việt; thể hiện rõ nội dung phản ánh, kiến nghị", "Ghi rõ tên, địa chỉ, số điện thoại của cá nhân, tổ chức có phản ánh, kiến nghị", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo điểm b, c, d khoản 1 Điều 7 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, phản ánh, kiến nghị bằng Phiếu lấy ý kiến được áp dụng khi nào?",
+    opts: ["Trong trường hợp cá nhân, tổ chức muốn phản ánh, kiến nghị về việc thực hiện quy định hành chính cụ thể", "Theo yêu cầu của cơ quan nhà nước có thẩm quyền", "Cả 2 trường hợp trên"],
+    ans: 2, explain: "Theo điểm a khoản 3 Điều 7 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Việc gửi Phiếu lấy ý kiến đến cá nhân, tổ chức để lấy ý kiến về QĐHC được thực hiện qua cách thức nào?",
+    opts: ["Gửi công văn xin lấy ý kiến; lấy ý kiến qua phương tiện thông tin đại chúng", "Gửi thông điệp dữ liệu qua mạng máy tính điện tử (thư điện tử, lấy ý kiến công khai trên Cổng thông tin điện tử)", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo điểm b khoản 3 Điều 7 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, cán bộ, công chức tiếp nhận phản ánh, kiến nghị phải có trách nhiệm nào?",
+    opts: ["Hướng dẫn cá nhân, tổ chức thực hiện phản ánh, kiến nghị theo quy định", "Không chậm trễ hoặc gây khó khăn, nhũng nhiễu khi tiếp nhận; tuân thủ đúng quy trình, thời hạn tiếp nhận", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo Điều 11 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, tổ chức, cá nhân có phản ánh, kiến nghị có những quyền nào?",
+    opts: ["Có quyền phản ánh, kiến nghị với các cơ quan nhà nước về quy định hành chính", "Có quyền yêu cầu cơ quan HCNN tiếp nhận thông báo về tình hình xử lý phản ánh, kiến nghị", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 1, 2 Điều 12 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, tổ chức, cá nhân có phản ánh, kiến nghị có những trách nhiệm nào?",
+    opts: ["Phản ánh, kiến nghị phải trình bày rõ ràng, trung thực, có căn cứ", "Phản ánh, kiến nghị theo đúng hình thức, yêu cầu quy định tại Nghị định số 20/2008/NĐ-CP", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 3, 4 Điều 12 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 63/2010/NĐ-CP, \"thủ tục hành chính\" được hiểu như thế nào?",
+    opts: ["Là quy trình, các bước thực hiện, giải quyết một việc", "Là các bước giải quyết công việc phục vụ công tác quản lý - điều hành của cơ quan nhà nước", "Là trình tự, cách thức thực hiện, hồ sơ và yêu cầu, điều kiện do cơ quan nhà nước quy định để giải quyết một công việc cụ thể liên quan đến cá nhân, tổ chức"],
+    ans: 2, explain: "Theo khoản 1 Điều 3 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Nghị định số 63/2010/NĐ-CP về kiểm soát TTHC không điều chỉnh nội dung nào?",
+    opts: ["TTHC trong nội bộ cơ quan HCNN, giữa các cơ quan với nhau không liên quan đến giải quyết TTHC cho cá nhân, tổ chức", "Thủ tục xử lý vi phạm hành chính; thủ tục thanh tra và TTHC có nội dung bí mật nhà nước", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 2 Điều 1 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 63/2010/NĐ-CP, \"kiểm soát thủ tục hành chính\" được hiểu như thế nào?",
+    opts: ["Là việc xem xét, đánh giá, theo dõi nhằm bảo đảm tính khả thi của quy định về TTHC, đáp ứng yêu cầu công khai, minh bạch trong quá trình tổ chức thực hiện TTHC", "Là việc xem xét, đánh giá, theo dõi nhằm bảo đảm tính khả thi của quy định về TTHC trong văn bản QPPL", "Là việc theo dõi thi hành pháp luật về TTHC trong thực tiễn"],
+    ans: 0, explain: "Theo khoản 5 Điều 3 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 63/2010/NĐ-CP, \"hồ sơ\" được hiểu như thế nào?",
+    opts: ["Là những loại giấy tờ cần phải nộp cho cơ quan, tổ chức có thẩm quyền trước khi giải quyết một công việc", "Là những loại giấy tờ cần phải xuất trình cho cơ quan, tổ chức có thẩm quyền trước khi giải quyết một công việc", "Là những loại giấy tờ cần phải nộp hoặc xuất trình cho cơ quan, tổ chức có thẩm quyền trước khi giải quyết một công việc cụ thể cho cá nhân, tổ chức"],
+    ans: 2, explain: "Theo khoản 3 Điều 3 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Nghị định số 63/2010/NĐ-CP quy định cán bộ, công chức thực hiện TTHC bị nghiêm cấm hành vi nào?",
+    opts: ["Tiết lộ thông tin về hồ sơ liên quan đến bí mật kinh doanh, bí mật cá nhân; sử dụng thông tin đó để xâm hại quyền, lợi ích hợp pháp", "Từ chối thực hiện, kéo dài thời gian hoặc tự ý yêu cầu bổ sung hồ sơ ngoài quy định", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm a, b khoản 1 Điều 6 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Nghị định số 63/2010/NĐ-CP quy định đối tượng thực hiện TTHC bị nghiêm cấm hành vi nào?",
+    opts: ["Cản trở hoạt động của cơ quan nhà nước, người có thẩm quyền", "Đưa hối lộ hoặc dùng thủ đoạn khác để lừa dối cơ quan nhà nước trong thực hiện TTHC", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo khoản 2 Điều 6 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Nghị định số 63/2010/NĐ-CP quy định cán bộ, công chức bị nghiêm cấm hành vi nào liên quan đến tác phong?",
+    opts: ["Hách dịch, cửa quyền, sách nhiễu; lợi dụng các vướng mắc về TTHC để trục lợi", "Nhận tiền hoặc quà biếu ngoài phí, lệ phí đã quy định", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm c, d khoản 1 Điều 6 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Nghị định số 63/2010/NĐ-CP quy định cán bộ, công chức bị nghiêm cấm hành vi nào khác?",
+    opts: ["Từ chối thực hiện, kéo dài thời gian hoặc tự ý yêu cầu bổ sung hồ sơ ngoài quy định", "Đùn đẩy trách nhiệm, thiếu hợp tác, chậm trễ, gây cản trở trong thực hiện nhiệm vụ", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm b, đ khoản 1 Điều 6 Nghị định số 63/2010/NĐ-CP."
+  },
+  {
+    q: "Luật Ban hành văn bản QPPL năm 2015 quy định về thẩm quyền quy định TTHC của HĐND, UBND tỉnh như thế nào?",
+    opts: ["Bị nghiêm cấm trong mọi trường hợp", "Được quy định về TTHC trong mọi trường hợp", "Được quy định về TTHC trong trường hợp được giao trong luật"],
+    ans: 2, explain: "Theo khoản 4 Điều 14 Luật Ban hành văn bản QPPL năm 2015."
+  },
+  {
+    q: "Quyết định số 32/2018/QĐ-UBND tỉnh Nghệ An quy định cơ quan nào có trách nhiệm phát hiện đề xuất rà soát TTHC thuộc phạm vi quản lý của UBND tỉnh?",
+    opts: ["Cơ quan chuyên môn thuộc UBND tỉnh", "UBND cấp huyện, cấp xã", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 1 Điều 7 Quy chế ban hành kèm theo Quyết định số 32/2018/QĐ-UBND."
+  },
+  {
+    q: "Thông tư số 02/2017/TT-VPCP quy định việc công bố TTHC nhằm mục đích gì?",
+    opts: ["Đảm bảo thực hiện đầy đủ, chính xác, đồng bộ, thống nhất, minh bạch và kịp thời các quy định TTHC", "Tạo điều kiện cho cơ quan nhà nước và nhân dân kiểm tra, giám sát việc giải quyết TTHC", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 1 Điều 4 Thông tư số 02/2017/TT-VPCP."
+  },
+  {
+    q: "Thông tư số 02/2017/TT-VPCP quy định việc công bố danh mục TTHC thuộc thẩm quyền giải quyết của các cấp chính quyền tỉnh thuộc thẩm quyền của ai?",
+    opts: ["Chủ tịch UBND cấp tỉnh", "Thủ trưởng các cơ quan chuyên môn thuộc UBND tỉnh", "Chủ tịch UBND cấp huyện, cấp xã"],
+    ans: 0, explain: "Theo khoản 1, 2 Điều 10 Thông tư số 02/2017/TT-VPCP."
+  },
+  {
+    q: "Nghị định số 92/2017/NĐ-CP quy định: Hệ thống thông tin tiếp nhận, xử lý phản ánh, kiến nghị như thế nào?",
+    opts: ["Là hệ thống thông tin điện tử có chức năng hỗ trợ việc tiếp nhận, xử lý và công khai kết quả xử lý các phản ánh, kiến nghị về QĐHC của cá nhân, tổ chức", "Là hệ thống thông tin điện tử có chức năng hỗ trợ việc tiếp nhận, xử lý các phản ánh, kiến nghị", "Là hệ thống thông tin điện tử có chức năng hỗ trợ công khai kết quả xử lý các phản ánh, kiến nghị"],
+    ans: 0, explain: "Theo khoản 2 Nghị định số 92/2017/NĐ-CP (bổ sung khoản 6 Điều 3 NĐ 20/2008)."
+  },
+  {
+    q: "Theo Nghị định số 92/2017/NĐ-CP, cơ quan nào ở cấp huyện tham mưu giúp Chủ tịch UBND về kiểm soát TTHC?",
+    opts: ["Phòng Tư pháp", "Văn phòng HĐND và UBND", "Phòng Nội vụ"],
+    ans: 1, explain: "Theo khoản 2 Điều 4 Nghị định số 92/2017/NĐ-CP (sửa đổi khoản 10 Điều 7 NĐ 37/2014)."
+  },
+  {
+    q: "Theo Nghị định số 20/2008/NĐ-CP, phản ánh về quy định hành chính là gì?",
+    opts: ["Là việc cá nhân có ý kiến về những vướng mắc; sự không hợp pháp, không hợp lý, không đồng bộ", "Là việc cá nhân, tổ chức có ý kiến về những vấn đề liên quan đến quy định hành chính", "Là việc cá nhân, tổ chức có ý kiến về những vấn đề liên quan đến QĐHC, bao gồm: những vướng mắc; sự không hợp pháp, không hợp lý, không đồng bộ, không thống nhất với hệ thống pháp luật hoặc điều ước quốc tế và những vấn đề khác"],
+    ans: 2, explain: "Theo khoản 4 Điều 3 Nghị định số 20/2008/NĐ-CP."
+  },
+  {
+    q: "Người dân, doanh nghiệp có thể phản ánh, kiến nghị qua Cổng Dịch vụ công Quốc gia về nội dung nào?",
+    opts: ["Yêu cầu hướng dẫn, giải đáp pháp luật", "Hành vi chậm trễ, gây phiền hà hoặc không thực hiện, thực hiện không đúng quy định của CBCCVC trong giải quyết TTHC", "Khiếu nại, tố cáo hành vi vi phạm pháp luật của cơ quan, người có thẩm quyền"],
+    ans: 1, explain: "Theo khoản 1 Điều 4 Quy chế ban hành kèm theo Quyết định số 574/QĐ-TTg."
+  },
+  {
+    q: "Người dân, doanh nghiệp phản ánh, kiến nghị qua Cổng DVC Quốc gia về những nội dung nào khác?",
+    opts: ["Phản ánh, kiến nghị về cơ chế, chính sách, TTHC không phù hợp thực tế, không hợp pháp, trái điều ước quốc tế", "Phản ánh, kiến nghị về những giải pháp, sáng kiến ban hành mới quy định về cơ chế, chính sách, TTHC liên quan đến sản xuất kinh doanh và đời sống", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo khoản 2, 3 Điều 4 Quy chế ban hành kèm theo Quyết định số 574/QĐ-TTg."
+  },
+  {
+    q: "Quyết định số 45/2016/QĐ-TTg về tiếp nhận hồ sơ, trả kết quả qua dịch vụ bưu chính công ích không điều chỉnh nội dung nào?",
+    opts: ["Việc tiếp nhận hồ sơ, trả kết quả qua bưu chính công ích theo yêu cầu của tổ chức, cá nhân", "Việc tiếp nhận hồ sơ, trả kết quả đối với TTHC yêu cầu tổ chức, cá nhân không được ủy quyền và phải có mặt trực tiếp", "Trường hợp tổ chức, cá nhân lựa chọn dịch vụ chuyển phát hồ sơ đến cơ quan nhà nước"],
+    ans: 1, explain: "Theo khoản 2 Điều 1 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Việc chuyển phát hồ sơ, trả kết quả qua dịch vụ bưu chính công ích phải bảo đảm yêu cầu nào?",
+    opts: ["Bảo đảm vai trò của doanh nghiệp cung ứng bưu chính công ích; sự phối hợp giữa doanh nghiệp với tổ chức, cá nhân và cơ quan có thẩm quyền", "Chịu sự hướng dẫn, kiểm tra về chất lượng dịch vụ; được hưởng cơ chế ưu tiên, ưu đãi theo quy định", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 4, 5 Điều 4 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Cơ quan có thẩm quyền giải quyết TTHC qua bưu chính công ích có trách nhiệm niêm yết thông tin nào?",
+    opts: ["Danh mục TTHC không thực hiện tiếp nhận, trả kết quả qua bưu chính công ích", "TTHC thực hiện tiếp nhận hồ sơ, trả kết quả qua bưu chính công ích", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 1, 2 Điều 13 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Cơ quan có thẩm quyền giải quyết TTHC qua bưu chính công ích có trách nhiệm công khai thông tin gì?",
+    opts: ["Công khai địa chỉ, số điện thoại, địa chỉ thư điện tử tại trụ sở cơ quan", "Công khai địa chỉ, số điện thoại, địa chỉ thư điện tử, trang thông tin điện tử để tổ chức, cá nhân liên lạc trước, trong và sau khi gửi, nhận hồ sơ qua bưu chính", "Công khai địa chỉ thư điện tử"],
+    ans: 1, explain: "Theo khoản 7 Điều 13 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Khi hồ sơ bị mất, thất lạc hoặc hư hỏng trong quá trình chuyển phát, doanh nghiệp bưu chính có trách nhiệm gì?",
+    opts: ["Thông báo để tổ chức, cá nhân biết và làm lại giấy tờ", "Trách nhiệm thuộc về nhân viên bưu chính", "Phối hợp với tổ chức, cá nhân và cơ quan có thẩm quyền để khắc phục hậu quả"],
+    ans: 2, explain: "Theo khoản 1 Điều 14 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Khi cần cấp lại hồ sơ bị mất không thể khôi phục, doanh nghiệp bưu chính có trách nhiệm gì?",
+    opts: ["Không phải chịu trách nhiệm. Trách nhiệm thuộc về tổ chức, cá nhân có giấy tờ bị mất", "Phối hợp với tổ chức, cá nhân và cơ quan có thẩm quyền cấp lại các giấy tờ cho tổ chức, cá nhân", "Không phải chịu trách nhiệm. Trách nhiệm thuộc về cơ quan, tổ chức có thẩm quyền cấp giấy tờ"],
+    ans: 1, explain: "Theo khoản 2 Điều 14 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Khi do lỗi của doanh nghiệp bưu chính làm hồ sơ bị mất không khôi phục được, doanh nghiệp phải làm gì?",
+    opts: ["Khắc phục mọi hậu quả đã gây ra", "Chịu mọi chi phí phát sinh trong việc xin cấp lại hồ sơ; bồi thường thiệt hại nếu gây thiệt hại", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 3, 4 Điều 14 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Nhân viên bưu chính trong quá trình chuyển phát hồ sơ không được làm gì?",
+    opts: ["Tiết lộ thông tin về hồ sơ liên quan đến bí mật của tổ chức, cá nhân; từ chối hoặc kéo dài thời gian tiếp nhận hồ sơ", "Sách nhiễu, gây phiền hà; thiếu trách nhiệm, chậm trễ; thực hiện các hành vi khác vi phạm pháp luật", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm a, b, c, d, đ khoản 5 Điều 16 Quyết định số 45/2016/QĐ-TTg."
+  },
+  {
+    q: "Tổ chức, cá nhân sử dụng dịch vụ bưu chính công ích thực hiện TTHC có trách nhiệm gì?",
+    opts: ["Chịu trách nhiệm về tính hợp pháp, chính xác, đầy đủ của tài liệu, giấy tờ trong hồ sơ", "Thanh toán đầy đủ, kịp thời giá cước dịch vụ", "Cả 2 phương án trên"],
+    ans: 2, explain: "Theo khoản 1, 3 Điều 17 Quyết định số 45/2016/QĐ-TTg."
+  },
+  // Từ file tai_lieu_mot_cua.docx
+  {
+    q: "PAR INDEX là tên tiếng Anh của chỉ số nào?",
+    opts: ["Chỉ số năng lực cạnh tranh cấp tỉnh", "Chỉ số hiệu quả quản trị và hành chính công cấp tỉnh", "Chỉ số cải cách hành chính"],
+    ans: 2, explain: "Theo Điều 1 Quyết định số 2636/QĐ-BNV ngày 10/12/2018 của Bộ trưởng Bộ Nội vụ."
+  },
+  {
+    q: "PCI là tên viết tắt tiếng Anh của chỉ số nào?",
+    opts: ["Chỉ số năng lực cạnh tranh cấp tỉnh", "Chỉ số hiệu quả quản trị và hành chính công cấp tỉnh", "Chỉ số cải cách hành chính"],
+    ans: 0, explain: "PCI = Provincial Competitiveness Index (Chỉ số năng lực cạnh tranh cấp tỉnh)."
+  },
+  {
+    q: "PAPI là tên viết tắt tiếng Anh của chỉ số nào?",
+    opts: ["Chỉ số năng lực cạnh tranh cấp tỉnh", "Chỉ số hiệu quả quản trị và hành chính công cấp tỉnh", "Chỉ số cải cách hành chính"],
+    ans: 1, explain: "PAPI = Provincial Governance and Public Administration Performance Index."
+  },
+  {
+    q: "SIPAS là tên viết tắt tiếng Anh của chỉ số nào?",
+    opts: ["Chỉ số năng lực cạnh tranh cấp tỉnh", "Chỉ số hiệu quả quản trị và hành chính công cấp tỉnh", "Chỉ số hài lòng về sự phục vụ hành chính"],
+    ans: 2, explain: "SIPAS = Satisfaction Index of Public Administration Services."
+  },
+  {
+    q: "Chỉ số PCI phản ánh về nội dung gì?",
+    opts: ["Phản ánh hiệu quả quản trị và hành chính công cấp tỉnh ở Việt Nam", "Đánh giá và xếp hạng chính quyền các tỉnh, thành phố về chất lượng điều hành kinh tế và xây dựng môi trường kinh doanh thuận lợi", "Theo dõi, đánh giá kết quả thực hiện cải cách hành chính hàng năm của các bộ, ngành, địa phương"],
+    ans: 1, explain: "PCI do VCCI và USAID công bố, đánh giá chất lượng điều hành kinh tế và môi trường kinh doanh."
+  },
+  {
+    q: "Chỉ số PAPI phản ánh về nội dung gì?",
+    opts: ["Phản ánh hiệu quả quản trị và hành chính công cấp tỉnh ở Việt Nam", "Đánh giá và xếp hạng chính quyền các tỉnh về chất lượng điều hành kinh tế", "Theo dõi, đánh giá kết quả thực hiện cải cách hành chính hàng năm"],
+    ans: 0, explain: "PAPI phản ánh hiệu quả quản trị và hành chính công cấp tỉnh ở Việt Nam."
+  },
+  {
+    q: "Để đánh giá sự hài lòng của người dân, tổ chức đối với sự phục vụ của cơ quan HCNN, Bộ trưởng Bộ Nội vụ đã ban hành Quyết định nào?",
+    opts: ["Quyết định số 2640/QĐ-BNV ngày 10/10/2017", "Quyết định số 2636/QĐ-BNV ngày 10/12/2018", "Quyết định số 2520/QĐ-BNV ngày 15/11/2018"],
+    ans: 0, explain: "Quyết định số 2640/QĐ-BNV ngày 10/10/2017 ban hành Đề án \"Đo lường sự hài lòng giai đoạn 2017-2020\"."
+  },
+  {
+    q: "Chỉ số SIPAS phản ánh về nội dung gì?",
+    opts: ["Chỉ số năng lực cạnh tranh cấp tỉnh và hiệu quả quản trị", "Đánh giá và xếp hạng chính quyền về chất lượng điều hành kinh tế", "Đo lường sự hài lòng của người dân, tổ chức đối với sự phục vụ của cơ quan HCNN"],
+    ans: 2, explain: "Theo điểm a khoản 1 mục I, điểm b khoản 5 mục III Điều 1 Quyết định số 2640/QĐ-BNV."
+  },
+  {
+    q: "Hiện nay, cơ chế một cửa, một cửa liên thông thực hiện theo quy định tại văn bản nào?",
+    opts: ["Nghị định số 61/2018/NĐ-CP ngày 23/4/2018", "Nghị định số 60/2018/NĐ-CP ngày 20/4/2018", "Quyết định số 09/2015/QĐ-TTg ngày 25/3/2015"],
+    ans: 0, explain: "Nghị định số 61/2018/NĐ-CP ngày 23/4/2018 của Chính phủ."
+  },
+  {
+    q: "Để triển khai Nghị định số 61/2018/NĐ-CP, Thủ tướng Chính phủ đã ban hành văn bản nào?",
+    opts: ["Quyết định số 1254/QĐ-TTg ngày 26/9/2018", "Quyết định số 1486/QĐ-TTg ngày 06/11/2018", "Quyết định số 985/QĐ-TTg ngày 08/8/2018"],
+    ans: 2, explain: "Quyết định số 985/QĐ-TTg ngày 08/8/2018 ban hành Kế hoạch thực hiện Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, cơ chế một cửa trong giải quyết TTHC được giải thích như thế nào?",
+    opts: ["Là phương thức tiếp nhận hồ sơ, giải quyết và trả kết quả, theo dõi, giám sát, đánh giá việc giải quyết TTHC cho tổ chức, cá nhân của một cơ quan thông qua Bộ phận Một cửa", "Là phương thức tiếp nhận hồ sơ, giải quyết và trả kết quả TTHC thông qua Bộ phận Một cửa", "Là phương thức theo dõi, giám sát, đánh giá việc giải quyết TTHC qua Bộ phận Một cửa"],
+    ans: 0, explain: "Theo Khoản 1 Điều 3 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, cơ chế một cửa liên thông được giải thích như thế nào?",
+    opts: ["Là phương thức phối hợp giữa các cơ quan trong tiếp nhận hồ sơ, giải quyết và trả kết quả một TTHC hoặc nhóm TTHC có liên quan", "Là phương thức phối hợp giữa các cơ quan trong tiếp nhận hồ sơ, giải quyết và trả kết quả, theo dõi, giám sát, đánh giá việc giải quyết TTHC cho tổ chức, cá nhân thông qua Bộ phận Một cửa", "Là phương thức phối hợp giữa các cơ quan trong theo dõi, giám sát, đánh giá việc giải quyết TTHC qua Bộ phận Một cửa"],
+    ans: 1, explain: "Theo khoản 2 Điều 3 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, Bộ phận một cửa được giải thích như thế nào?",
+    opts: ["Là tên gọi chung của Bộ phận Tiếp nhận và Trả kết quả, thực hiện nhiệm vụ hướng dẫn, tiếp nhận, giải quyết hoặc chuyển hồ sơ, trả kết quả, theo dõi, giám sát, đánh giá", "Là nơi hướng dẫn, tiếp nhận, giải quyết hoặc chuyển hồ sơ giải quyết, trả kết quả TTHC", "Là tên gọi chung của Bộ phận Tiếp nhận và Trả kết quả hoặc Trung tâm Phục vụ hành chính công cấp tỉnh"],
+    ans: 2, explain: "Theo khoản 3 Điều 3 Nghị định số 61/2018/NĐ-CP: bao gồm cả Trung tâm PVHCC cấp tỉnh."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, Cổng dịch vụ công cấp bộ, cấp tỉnh được giải thích như thế nào?",
+    opts: ["Là cổng tích hợp thông tin về dịch vụ công trực tuyến, tình hình giải quyết và kết quả giải quyết TTHC trên cơ sở tích hợp, chia sẻ dữ liệu với Hệ thống thông tin một cửa điện tử", "Là cổng tích hợp thông tin về tình hình giải quyết TTHC", "Là cổng tích hợp thông tin về dịch vụ công trực tuyến"],
+    ans: 0, explain: "Theo khoản 5 Điều 3 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, đánh giá việc giải quyết TTHC được giải thích như thế nào?",
+    opts: ["Là nhận xét, kết luận của cơ quan có thẩm quyền về chất lượng và tiến độ thực hiện của CBCCVC", "Là nhận xét, kết luận của cơ quan có thẩm quyền, tổ chức, cá nhân về chất lượng và tiến độ thực hiện của cá nhân, bộ phận một cửa, cơ quan có thẩm quyền giải quyết TTHC", "Là nhận xét, kết luận của tổ chức, cá nhân về chất lượng và tiến độ thực hiện của CBCCVC"],
+    ans: 1, explain: "Theo khoản 7 Điều 3 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, nguyên tắc thực hiện cơ chế một cửa, một cửa liên thông?",
+    opts: ["Lấy sự hài lòng của tổ chức, cá nhân là thước đo chất lượng và hiệu quả phục vụ", "Việc giải quyết TTHC được quản lý tập trung, thống nhất", "Cả 02 nguyên tắc trên"],
+    ans: 2, explain: "Theo Khoản 1, 2 Điều 4 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Nguyên tắc thực hiện cơ chế một cửa, một cửa liên thông theo Nghị định số 61/2018/NĐ-CP?",
+    opts: ["Giải quyết TTHC kịp thời, nhanh chóng, thuận tiện, đúng pháp luật, công bằng, bình đẳng, khách quan, công khai, minh bạch", "Quá trình giải quyết TTHC được đôn đốc, kiểm tra, theo dõi, giám sát, đánh giá bằng các phương thức khác nhau trên cơ sở đẩy mạnh ứng dụng CNTT", "Cả 02 nguyên tắc trên"],
+    ans: 2, explain: "Theo khoản 3, 4 Điều 4 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Nguyên tắc nào không phải là nguyên tắc thực hiện cơ chế một cửa, một cửa liên thông theo Nghị định số 61/2018/NĐ-CP?",
+    opts: ["Lấy sự hài lòng của tổ chức, cá nhân là thước đo chất lượng và hiệu quả phục vụ", "Không làm phát sinh chi phí ngoài quy định pháp luật", "Làm việc tập thể, thảo luận và quyết định theo đa số"],
+    ans: 2, explain: "Theo Điều 4 Nghị định số 61/2018/NĐ-CP: \"Làm việc tập thể, quyết định theo đa số\" không phải nguyên tắc."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, nguyên tắc về tuân thủ pháp luật quốc tế?",
+    opts: ["Đảm bảo hiệu lực, hiệu quả trong hoạt động quản lý nhà nước trong giải quyết TTHC", "Tuân thủ các quy định của pháp luật Việt Nam và các điều ước quốc tế có liên quan đến thực hiện cơ chế một cửa mà Việt Nam đã ký kết hoặc gia nhập", "Tổ chức, cá nhân phải phối hợp chặt chẽ với cơ quan nhà nước trong giải quyết TTHC"],
+    ans: 1, explain: "Theo Khoản 7 Điều 4 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, CBCCVC được giao thực hiện TTHC tại Bộ phận Một cửa không được làm gì?",
+    opts: ["Cửa quyền, hách dịch, gây phiền hà cho tổ chức, cá nhân; cản trở tổ chức, cá nhân lựa chọn hình thức nộp hồ sơ", "Cản trở hoặc ngăn chặn trái phép quá trình truyền, gửi, nhận dữ liệu điện tử; thay đổi, xóa, hủy, giả mạo nội dung dữ liệu TTHC", "Cả 02 hành vi trên"],
+    ans: 2, explain: "Theo điểm a, b, c khoản 1 Điều 5 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, CBCCVC tại Bộ phận Một cửa không được làm gì tiếp theo?",
+    opts: ["Tiết lộ thông tin về hồ sơ bí mật; từ chối thực hiện, kéo dài thời gian giải quyết hoặc tự ý yêu cầu bổ sung hồ sơ ngoài quy định", "Trực tiếp giao dịch, yêu cầu tổ chức, cá nhân bổ sung hồ sơ không thông qua Bộ phận Một cửa; đùn đẩy trách nhiệm, thiếu hợp tác, ứng xử không phù hợp quy chế văn hóa công sở", "Cả 02 hành vi trên"],
+    ans: 2, explain: "Theo điểm d, e, c, g, h khoản 1 Điều 5 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Tổ chức, cá nhân yêu cầu giải quyết TTHC không được làm gì theo Nghị định số 61/2018/NĐ-CP?",
+    opts: ["Gian lận, mạo nhận, chiếm đoạt hồ sơ; cản trở việc giải quyết TTHC; dùng thủ đoạn lừa dối, hối lộ CBCCVC", "Vu khống, mạo danh người khác để tố cáo sai sự thật, không có căn cứ, không có chứng cứ", "Cả hai hành vi trên"],
+    ans: 2, explain: "Theo điểm a, b, c, d khoản 2 Điều 5 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, tổ chức, cá nhân thực hiện TTHC không được làm gì liên quan đến xúc phạm?",
+    opts: ["Xúc phạm danh dự cơ quan; dùng vũ lực, đe dọa, xúc phạm nhân phẩm của CBCCVC trong quá trình hướng dẫn, tiếp nhận, giải quyết TTHC", "Nhận xét, đánh giá thiếu khách quan, không trung thực về việc thực hiện nhiệm vụ của CBCCVC", "Cả hai hành vi trên"],
+    ans: 0, explain: "Theo điểm đ, e khoản 2 Điều 5 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, tổ chức, cá nhân thực hiện TTHC được làm gì?",
+    opts: ["Dùng thủ đoạn để lừa dối, hối lộ CBCCVC trong quá trình giải quyết TTHC", "Phản ánh, kiến nghị, khiếu nại, tố cáo CBCCVC khi có căn cứ, chứng cứ chứng minh việc hướng dẫn, tiếp nhận, giải quyết, trả kết quả không đúng quy định pháp luật", "Nhận xét, đánh giá thiếu khách quan, không trung thực về việc thực hiện nhiệm vụ của CBCCVC"],
+    ans: 1, explain: "Theo điểm d khoản 1 Điều 6 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, tổ chức, cá nhân yêu cầu giải quyết TTHC không được làm gì?",
+    opts: ["Vu khống, tố cáo sai sự thật, không có căn cứ, không có chứng cứ chứng minh hành vi vi phạm pháp luật", "Từ chối thực hiện những yêu cầu không được quy định trong văn bản QPPL quy định TTHC", "Phản ánh, kiến nghị về sự không cần thiết, tính không hợp lý và không hợp pháp của TTHC"],
+    ans: 0, explain: "Theo điểm d khoản 2 Điều 5 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, tổ chức, cá nhân thực hiện TTHC có các quyền nào?",
+    opts: ["Phản ánh, kiến nghị về sự không cần thiết, tính không hợp lý và không hợp pháp của TTHC", "Phản ánh, kiến nghị, khiếu nại, tố cáo CBCCVC khi có căn cứ, chứng cứ chứng minh", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm c, d khoản 1 Điều 6 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Theo Nghị định số 61/2018/NĐ-CP, tổ chức, cá nhân thực hiện TTHC phải chịu trách nhiệm về gì?",
+    opts: ["Chịu trách nhiệm về tính hợp pháp, chính xác của giấy tờ trong hồ sơ; thực hiện đầy đủ các quy định; nộp đầy đủ phí, lệ phí", "Khi nhận kết quả tại Bộ phận Một cửa phải mang theo Giấy tiếp nhận hồ sơ và hẹn trả kết quả; có ủy quyền thì mang thêm giấy ủy quyền", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm a, b, c khoản 2 Điều 6 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Phạm vi tiếp nhận TTHC tại Trung tâm PVHCC cấp tỉnh theo Nghị định số 61/2018/NĐ-CP?",
+    opts: ["Hồ sơ TTHC thuộc thẩm quyền giải quyết hoặc liên thông của UBND cấp tỉnh, các cơ quan chuyên môn thuộc UBND cấp tỉnh", "Hồ sơ TTHC thuộc thẩm quyền giải quyết hoặc liên thông của các cơ quan Trung ương ngành dọc; TTHC của cơ quan chuyên môn cấp tỉnh, UBND cấp xã được giao tiếp nhận tại cấp huyện", "Hồ sơ TTHC của cơ quan chuyên môn cấp tỉnh; cơ quan Trung ương ngành dọc; TTHC của cơ quan chuyên môn cấp tỉnh, UBND cấp xã được giao tiếp nhận tại cấp huyện"],
+    ans: 2, explain: "Theo điểm b, d khoản 1 Điều 14 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Phạm vi tiếp nhận TTHC tại Bộ phận Tiếp nhận và Trả kết quả cấp huyện theo Nghị định số 61/2018/NĐ-CP?",
+    opts: ["Hồ sơ tất cả TTHC thuộc thẩm quyền giải quyết của UBND cấp huyện, các cơ quan chuyên môn thuộc UBND cấp huyện", "Hồ sơ tất cả TTHC thuộc thẩm quyền giải quyết hoặc liên thông của UBND cấp huyện; TTHC của cơ quan chuyên môn cấp tỉnh, UBND cấp xã được giao tiếp nhận tại cấp huyện", "Hồ sơ TTHC thuộc thẩm quyền hoặc liên thông giải quyết của UBND cấp huyện; một số TTHC của cơ quan chuyên môn cấp tỉnh"],
+    ans: 1, explain: "Theo điểm a khoản 2 Điều 14 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Phạm vi tiếp nhận TTHC tại Bộ phận Tiếp nhận và Trả kết quả cấp xã theo Nghị định số 61/2018/NĐ-CP?",
+    opts: ["Hồ sơ TTHC thuộc thẩm quyền giải quyết của cấp xã và những TTHC của cấp huyện được giao tiếp nhận tại cấp xã", "Hồ sơ TTHC thuộc thẩm quyền giải quyết của cấp xã", "Những TTHC của cấp huyện được giao tiếp nhận tại cấp xã"],
+    ans: 0, explain: "Theo khoản 4 Điều 14 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Bộ phận Một cửa các cấp theo Nghị định số 61/2018/NĐ-CP có nhiệm vụ nào?",
+    opts: ["Hướng dẫn, tiếp nhận hồ sơ; giải quyết hoặc chuyển hồ sơ; trả kết quả; theo dõi, giám sát, đánh giá; thu phí, lệ phí (nếu có)", "Phối hợp với các cơ quan liên quan giải quyết, trả kết quả; hỗ trợ tổ chức, cá nhân sử dụng dịch vụ công trực tuyến mức độ 3, 4", "Cả 02 nhiệm vụ trên"],
+    ans: 2, explain: "Theo điểm b, c khoản 1 Điều 8 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Bộ phận Một cửa các cấp theo Nghị định số 61/2018/NĐ-CP có quyền hạn nào?",
+    opts: ["Từ chối tiếp nhận các hồ sơ chưa đúng quy định", "Đề nghị các cơ quan có thẩm quyền cung cấp thông tin, tài liệu phục vụ tiếp nhận, giải quyết TTHC", "Cả hai phương án trên"],
+    ans: 2, explain: "Theo điểm a, b khoản 2 Điều 8 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Bộ phận Một cửa các cấp có quyền hạn nào trong việc cải tiến chất lượng?",
+    opts: ["Đề xuất sáng kiến, giải pháp hoàn thiện quy trình quy định pháp luật", "Đề xuất đổi mới, nâng cao chất lượng phục vụ; tổ chức thông tin, tuyên truyền về cơ chế một cửa, một cửa liên thông", "Phối hợp với cơ quan liên quan cung cấp thông tin, tài liệu phục vụ tiếp nhận, giải quyết TTHC"],
+    ans: 1, explain: "Theo điểm d khoản 2 Điều 8 Nghị định số 61/2018/NĐ-CP."
+  },
+  {
+    q: "Người đứng đầu Bộ phận Một cửa theo Nghị định số 61/2018/NĐ-CP có trách nhiệm gì trong quản lý CBCC?",
+    opts: ["Hàng tháng, thông báo cho cơ quan cử CBCC biết về kết quả thực hiện nhiệm vụ", "Quản lý thời gian làm việc; tiến độ xử lý; thái độ, tác phong của CBCC; hàng tháng thông báo cho cơ quan cử CBCC; từ chối tiếp nhận hoặc đề nghị thay thế CBCC vi phạm pháp luật, kỷ luật lao động", "Đề nghị rà soát trình Chủ tịch UBND tỉnh công bố danh mục TTHC"],
+    ans: 1, explain: "Theo Nghị định số 61/2018/NĐ-CP: người đứng đầu Bộ phận Một cửa quản lý toàn diện hoạt động của CBCC."
+  },
+  {
+    q: "Theo Nghị quyết số 17/NQ-CP ngày 07/3/2019, chỉ tiêu về dịch vụ công trực tuyến mức độ 3, 4 giai đoạn 2021-2025?",
+    opts: ["100% dịch vụ công trực tuyến mức độ 3, 4 phổ biến được tích hợp lên Cổng DVC Quốc gia", "95% dịch vụ công trực tuyến mức độ 3, 4 phổ biến được tích hợp lên Cổng DVC Quốc gia", "90% dịch vụ công trực tuyến mức độ 3, 4 phổ biến được tích hợp lên Cổng DVC Quốc gia"],
+    ans: 0, explain: "Theo tiết thứ hai điểm b khoản 2 mục III Nghị quyết số 17/NQ-CP."
+  },
+  {
+    q: "Theo Nghị quyết số 17/NQ-CP, chỉ tiêu về định danh điện tử giai đoạn 2021-2025?",
+    opts: ["35% người dân và doanh nghiệp được xác thực định danh điện tử thông suốt trên tất cả các hệ thống thông tin", "40% người dân và doanh nghiệp được xác thực định danh điện tử thông suốt trên tất cả các hệ thống thông tin", "45% người dân và doanh nghiệp được xác thực định danh điện tử thông suốt trên tất cả các hệ thống thông tin"],
+    ans: 1, explain: "Theo tiết thứ ba điểm b khoản 2 mục III Nghị quyết số 17/NQ-CP."
+  },
+  {
+    q: "Theo Nghị quyết số 17/NQ-CP, nhiệm vụ tiếp tục cải thiện điểm số chỉ số môi trường kinh doanh gồm những nội dung nào?",
+    opts: ["Cấp giấy phép đăng ký kinh doanh", "Khởi sự kinh doanh, cấp phép xây dựng, đăng ký tài sản, tiếp cận tín dụng, giải quyết tranh chấp hợp đồng và giải quyết phá sản doanh nghiệp, đấu thầu dự án đầu tư công", "Đăng ký giao dịch bảo đảm"],
+    ans: 1, explain: "Theo khoản 3 Mục III Nghị quyết số 17/NQ-CP."
+  },
+  {
+    q: "Theo Nghị quyết số 02/NQ-CP ngày 01/01/2020, trách nhiệm của Chủ tịch UBND cấp tỉnh đối với điều kiện kinh doanh?",
+    opts: ["Chỉ đạo thực thi đúng, đầy đủ những quy định về điều kiện kinh doanh đã được đơn giản hóa; không tự đặt thêm điều kiện kinh doanh dưới mọi hình thức; xử lý nghiêm CBCC không thực hiện đầy đủ", "Nghiên cứu, đề xuất sửa đổi các luật liên quan để bãi bỏ, đơn giản hóa điều kiện kinh doanh", "Thực hiện nghiêm việc công bố, công khai theo quy định về kiểm soát TTHC"],
+    ans: 0, explain: "Theo điểm c khoản 4 Mục III Nghị quyết số 02/NQ-CP ngày 01/01/2020."
+  },
+  {
+    q: "Theo Nghị quyết số 02/NQ-CP ngày 01/01/2020, mục tiêu thanh toán không dùng tiền mặt cho trường học đô thị đến hết 2020?",
+    opts: ["90% trường học trên địa bàn đô thị chấp nhận thanh toán học phí qua ngân hàng", "95% trường học trên địa bàn đô thị chấp nhận thanh toán học phí qua ngân hàng", "100% trường học trên địa bàn đô thị chấp nhận thanh toán học phí qua ngân hàng"],
+    ans: 2, explain: "Theo điểm d Khoản 6 Mục III Nghị quyết số 02/NQ-CP ngày 01/01/2020."
+  },
+  {
+    q: "Theo Nghị quyết số 02/NQ-CP ngày 01/01/2020, Bộ Công an hướng tới thanh toán không dùng tiền mặt ở lĩnh vực nào?",
+    opts: ["Thu phạt vi phạm hành chính lĩnh vực an toàn giao thông đường bộ", "Thu phạt vi phạm hành chính lĩnh vực kinh tế, an toàn giao thông", "Thu phạt vi phạm hành chính lĩnh vực an toàn giao thông đường thủy"],
+    ans: 0, explain: "Theo điểm g khoản 6 Mục III Nghị quyết số 02/NQ-CP ngày 01/01/2020."
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let playerName = '';
+let quiz = [];
+let current = 0;
+let answers = new Array(40).fill(null);
+let timerInt = null;
+let timeLeft = 45 * 60;
+let startTime = null;
+
+// ============================================================
+// LEADERBOARD (localStorage)
+// ============================================================
+const LS_KEY = 'quiz_tthc_lb_v1';
+
+function loadLB() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; }
+}
+
+function saveLB(lb) {
+  localStorage.setItem(LS_KEY, JSON.stringify(lb));
+}
+
+function addToLB(name, score, total, timeSec) {
+  const lb = loadLB();
+  lb.push({ name, score, total, pct: Math.round(score/total*100), timeSec, date: new Date().toLocaleDateString('vi-VN') });
+  lb.sort((a,b) => b.pct - a.pct || a.timeSec - b.timeSec);
+  saveLB(lb.slice(0, 20));
+}
+
+function clearLeaderboard() {
+  if (confirm('Bạn có chắc muốn xóa toàn bộ bảng xếp hạng?')) {
+    localStorage.removeItem(LS_KEY);
+    renderInlineLB();
+  }
+}
+
+function renderLBTable(lb, containerId, highlightName) {
+  const el = document.getElementById(containerId);
+  if (!lb.length) { el.innerHTML = '<div class="empty-lb">📭 Chưa có kết quả nào</div>'; return; }
+  let rows = lb.map((r, i) => {
+    const badgeClass = i===0 ? 'rank-1' : i===1 ? 'rank-2' : i===2 ? 'rank-3' : 'rank-n';
+    const m = Math.floor(r.timeSec/60), s = r.timeSec%60;
+    const t = `${m}:${String(s).padStart(2,'0')}`;
+    const hi = (r.name === highlightName) ? ' class="highlight"' : '';
+    const bar = Math.round(r.pct);
+    return `<tr${hi}><td><span class="rank-badge ${badgeClass}">${i+1}</span></td>
+      <td><strong>${esc(r.name)}</strong><br><small style="color:var(--muted)">${r.date}</small></td>
+      <td><strong style="color:var(--primary)">${r.score}/${r.total}</strong>
+        <div class="score-bar"><div class="score-bar-fill" style="width:${bar}%"></div></div>
+        <small style="color:var(--muted)">${r.pct}%</small></td>
+      <td><small style="color:var(--muted)">⏱ ${t}</small></td></tr>`;
+  }).join('');
+  el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Tên</th><th>Điểm</th><th>Thời gian</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderInlineLB() {
+  renderLBTable(loadLB(), 'inline-lb', playerName);
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ============================================================
+// TAB
+// ============================================================
+function showTab(id) {
+  document.getElementById('start-tab').style.display = id === 'start-tab' ? '' : 'none';
+  document.getElementById('lb-tab').style.display = id === 'lb-tab' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (id==='start-tab' && i===0)||(id==='lb-tab' && i===1)));
+  if (id === 'lb-tab') renderInlineLB();
+}
+
+// ============================================================
+// QUIZ LOGIC
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startQuiz() {
+  const name = document.getElementById('player-name').value.trim();
+  if (!name) { document.getElementById('player-name').focus(); document.getElementById('player-name').style.borderColor='var(--danger)'; return; }
+  document.getElementById('player-name').style.borderColor='';
+  playerName = name;
+  quiz = shuffle(ALL_QUESTIONS).slice(0, 40);
+  answers = new Array(40).fill(null);
+  current = 0;
+  timeLeft = 45 * 60;
+  startTime = Date.now();
+  document.getElementById('total-q-display').textContent = ALL_QUESTIONS.length;
+  document.getElementById('player-tag').textContent = '👤 ' + playerName;
+  showScreen('quiz-screen');
+  renderQuestion();
+  startTimer();
+}
+
+function renderQuestion() {
+  const q = quiz[current];
+  document.getElementById('q-counter').textContent = `Câu ${current+1} / 40`;
+  document.getElementById('question-num').textContent = `Câu ${current+1}`;
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('progress-bar').style.width = ((current+1)/40*100)+'%';
+  document.getElementById('answer-reveal').style.display = 'none';
+
+  const labels = ['A', 'B', 'C', 'D'];
+  const ol = document.getElementById('options-list');
+  ol.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    if (answers[current] !== null) {
+      btn.disabled = true;
+      if (i === q.ans) btn.classList.add('correct');
+      else if (i === answers[current]) btn.classList.add('wrong');
+    }
+    btn.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${esc(opt)}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    ol.appendChild(btn);
+  });
+
+  if (answers[current] !== null) {
+    showReveal(q);
+    document.getElementById('skip-btn').textContent = current < 39 ? 'Câu tiếp theo →' : 'Xem kết quả →';
+  } else {
+    document.getElementById('skip-btn').textContent = current < 39 ? 'Bỏ qua →' : 'Nộp bài →';
+  }
+}
+
+function selectAnswer(idx) {
+  if (answers[current] !== null) return;
+  answers[current] = idx;
+  const q = quiz[current];
+  const labels = ['A','B','C','D'];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b,i) => {
+    b.disabled = true;
+    if (i === q.ans) b.classList.add('correct');
+    else if (i === idx) b.classList.add('wrong');
+  });
+  showReveal(q);
+  document.getElementById('skip-btn').textContent = current < 39 ? 'Câu tiếp theo →' : 'Xem kết quả →';
+}
+
+function showReveal(q) {
+  const rev = document.getElementById('answer-reveal');
+  const labels = ['A','B','C','D'];
+  const isRight = answers[current] === q.ans;
+  rev.innerHTML = `<strong>${isRight ? '✅ Đúng!' : '❌ Sai!'}</strong> Đáp án đúng: <strong>${labels[q.ans]}. ${esc(q.opts[q.ans])}</strong><br><span style="color:var(--muted);font-size:13px">📖 ${esc(q.explain)}</span>`;
+  rev.style.display = 'block';
+}
+
+function nextQuestion() {
+  if (current < 39) { current++; renderQuestion(); }
+  else { submitQuiz(); }
+}
+
+function confirmSubmit() {
+  const done = answers.filter(a => a !== null).length;
+  const msg = done < 40 ? `Bạn còn ${40-done} câu chưa trả lời. Bạn có muốn nộp bài không?` : 'Bạn có muốn nộp bài không?';
+  if (confirm(msg)) submitQuiz();
+}
+
+function submitQuiz() {
+  clearInterval(timerInt);
+  const elapsed = Math.floor((Date.now()-startTime)/1000);
+  const score = quiz.reduce((acc,q,i) => acc + (answers[i]===q.ans?1:0), 0);
+  addToLB(playerName, score, 40, elapsed);
+  showResult(score, elapsed);
+}
+
+function showResult(score, elapsed) {
+  const pct = Math.round(score/40*100);
+  const pass = pct >= 50;
+  const circle = document.getElementById('score-circle');
+  circle.className = 'score-circle ' + (pass ? 'pass' : 'fail');
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('score-fraction').textContent = score + '/40';
+  document.getElementById('result-title').textContent = pass ? '🎉 Chúc mừng! Đạt yêu cầu' : '❌ Chưa đạt yêu cầu';
+  document.getElementById('result-subtitle').textContent = `Xin chào ${playerName}`;
+  document.getElementById('stat-correct').textContent = score;
+  document.getElementById('stat-wrong').textContent = 40 - score;
+  const m = Math.floor(elapsed/60), s = elapsed%60;
+  document.getElementById('stat-time').textContent = `${m}:${String(s).padStart(2,'0')}`;
+
+  // Review
+  const rv = document.getElementById('review-list');
+  rv.innerHTML = '';
+  quiz.forEach((q, i) => {
+    const isRight = answers[i] === q.ans;
+    const labels = ['A','B','C','D'];
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `<div class="review-item-header" onclick="toggleReview(this)">
+      <span class="ri-status ${isRight?'ok':'bad'}">${isRight?'✓':'✗'}</span>
+      <span style="flex:1;font-size:13px">${esc(q.q.substring(0,80))}${q.q.length>80?'...':''}</span>
+      <span style="color:var(--muted)">▼</span>
+    </div>
+    <div class="review-item-body">
+      <div style="margin-bottom:6px">${esc(q.q)}</div>
+      ${!isRight && answers[i]!==null ? `<div class="user-ans">Bạn chọn: ${labels[answers[i]]}. ${esc(q.opts[answers[i]])}</div>` : ''}
+      ${answers[i]===null ? `<div style="color:var(--muted)">Bỏ qua (không trả lời)</div>` : ''}
+      <div class="correct-ans">Đáp án đúng: ${labels[q.ans]}. ${esc(q.opts[q.ans])}</div>
+      <div style="margin-top:6px;font-size:13px;color:var(--muted)">📖 ${esc(q.explain)}</div>
+    </div>`;
+    rv.appendChild(item);
+  });
+
+  showScreen('result-screen');
+}
+
+function toggleReview(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer() {
+  updateTimerDisplay();
+  timerInt = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) { clearInterval(timerInt); submitQuiz(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft/60), s = timeLeft%60;
+  document.getElementById('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('timer-box').classList.toggle('warn', timeLeft <= 120);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  clearInterval(timerInt);
+  showScreen('start-screen');
+  showTab('start-tab');
+}
+
+// Init
+document.getElementById('total-q-display').textContent = ALL_QUESTIONS.length;
+document.getElementById('player-name').addEventListener('keydown', e => { if(e.key==='Enter') startQuiz(); });
+</script>
+</body>
+</html>
